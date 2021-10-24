@@ -245,7 +245,7 @@ class BetManager {
     for (let player in this.players) {
       playersList.push(this.players[player].getInformations());
     }
-    playersList.sort((x, y) => x.coins - y.coins);
+    playersList.sort((x, y) => y.coins - x.coins);
     return playersList;
   }
 
