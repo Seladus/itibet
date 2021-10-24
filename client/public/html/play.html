@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIBET</title>
+</head>
+
+<body>
+    <div id="ownerpanel" style="visibility: hidden;">
+        <button onclick="startBettingPhase(roomInfos.roomId, roomInfos.player.playerId)">Start betting phase</button>
+        <button onclick="endBettingPhase(roomInfos.roomId, roomInfos.player.playerId)">End betting phase</button>
+        <button onclick="closeBet(roomInfos.roomId, roomInfos.player.playerId, 'neutral')">Close bet</button>
+        <button onclick="closeBet(roomInfos.roomId, roomInfos.player.playerId, 'red')">Cashout Red Team</button>
+        <button onclick="closeBet(roomInfos.roomId, roomInfos.player.playerId, 'blue')">Cashout Blue Team</button>
+    </div>
+    <div id="playerpanel">
+        <input id="bet" type="number">
+        <button
+            onclick="placeBet(roomInfos.roomId, roomInfos.player.playerId, document.getElementById('bet').value, team)">Place
+            Bet
+        </button>
+        <button onclick="changeTeam('red', roomInfos.internalState.state)">Red</button>
+        <button onclick="changeTeam('blue', roomInfos.internalState.state)">Blue</button>
+        <div><span id="coins"></span> coins</div>
+        <div><span id="name"></span></div>
+        <div><span id="state-description">...</span></div>
+        <div>
+            <h2>LeaderBoard</h2>
+            <p>1. <span id="num1"></span></p>
+            <p>2. <span id="num2"></span></p>
+            <p>3. <span id="num3"></span></p>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var room = {};
+        var team = "neutral"
+
+        function changeTeam(newTeam, state) {
+            if (state === 0) {
+                console.log(`Changing team... New team is ${newTeam}.`);
+                team = newTeam;
+            }
+        }
+
+        function checkRoom(roomId) {
+            fetch(`/room/${roomId}`, {
+                method: "GET"
+            }).then(response => {
+                if (response.status != 200) {
+                    console.log("Can't join the room.")
+                    window.location.href = "/"
+                    window.location.replace("/")
+                }
+
+                response.json().then(data => {
+                    console.log(data);
+                });
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        function startBettingPhase(roomId, userId) {
+            fetch(`/room/${roomId}/bet/betting/start?userid=${userId}`, {
+                method: "POST"
+            }).then(response => {
+                if (response.status != 200) {
+                    console.log("Can't start betting phase")
+                }
+                console.log("Betting phase started.")
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        function endBettingPhase(roomId, userId) {
+            fetch(`/room/${roomId}/bet/betting/end?userid=${userId}`, {
+                method: "POST"
+            }).then(response => {
+                if (response.status != 200) {
+                    console.log("Can't start betting phase")
+                }
+                console.log("Betting phase ended.")
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        function closeBet(roomId, userId, team) {
+            fetch(`/room/${roomId}/bet/close?userid=${userId}&team=${team}`, {
+                method: "POST"
+            }).then(response => {
+                if (response.status != 200) {
+                    console.log("Can't close bet")
+                } else {
+                    console.log("Bet successfully closed.")
+                }
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        function placeBet(roomId, userId, value, team) {
+            if (team != "neutral") {
+                fetch(`/room/${roomId}/bet/place?userid=${userId}&bet=${value}&team=${team}`, {
+                    method: "PUT"
+                }).then(response => {
+                    if (response.status != 200) {
+                        console.log("Could not place the bet.")
+                    } else {
+                        console.log("Bet placed.")
+                    }
+                }).catch(error => {
+                    console.log(error);
+                });
+            }
+        }
+
+        function updateCoinsAmount(value) {
+            let element = document.getElementById("coins");
+            element.textContent = value;
+        }
+
+        function updateLeaderBoard(leaderboard) {
+            console.log(leaderboard[0])
+            let element = document.getElementById("num1");
+            if (typeof leaderboard[0] !== 'undefined') {
+                element.textContent = leaderboard[0].name;
+            }
+            element = document.getElementById("num2");
+            if (typeof leaderboard[1] !== 'undefined') {
+                element.textContent = leaderboard[1].name;
+            }
+            element = document.getElementById("num3");
+            if (typeof leaderboard[2] !== 'undefined') {
+                element.textContent = leaderboard[2].name;
+            }
+        }
+
+        function updateStateDescription(state) {
+            let element = document.getElementById("state-description");
+            let text = "";
+            if (state === 0) {
+                text = "Place your bets !";
+            } else if (state === 1) {
+                text = "Enjoy the show !";
+            } else if (state === 2) {
+                text = "Waiting for a new bet...";
+            }
+            element.textContent = text;
+        }
+
+        function updateName(name) {
+            let element = document.getElementById("name");
+            element.textContent = name;
+        }
+
+        function getUpdatedRoomState(roomId) {
+            fetch(`/room/${roomId}`, {
+                method: "GET"
+            }).then(response => {
+                if (response.status != 200) {
+                    console.log("Can't get room state.")
+                }
+
+                response.json().then(data => {
+                    console.log(data);
+                    roomInfos.internalState = data;
+                    updateCoinsAmount(roomInfos.internalState.players[roomInfos.player.id].coins);
+                    updateLeaderBoard(roomInfos.internalState.leaderBoard);
+                    updateStateDescription(roomInfos.internalState.state);
+                    updateName(roomInfos.internalState.players[roomInfos.player.id].name)
+                    console.log("Room state updated.");
+                });
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        roomInfos = JSON.parse(localStorage.getItem("roomInfo"))
+
+        if (roomInfos.player.isOwner) {
+            ownerpanel = document.getElementById("ownerpanel");
+            ownerpanel.style.visibility = "visible";
+        }
+
+        checkRoom(roomInfos.roomId);
+        getUpdatedRoomState(roomInfos.roomId);
+
+        var socket = io();
+        socket.on("update", _ => {
+            console.log("UPDATE REQUIRED");
+            getUpdatedRoomState(roomInfos.roomId)
+        })
+        socket.emit("join", { "roomId": roomInfos.roomId })
+    </script>
+</body>
+
+</html>

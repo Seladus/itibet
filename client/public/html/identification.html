@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITIBET</title>
+</head>
+
+<body>
+    <div>
+        <input id="username" type="text"></input>
+        <button onclick="joinRoom(roomInfo.roomId, roomInfo)">Join room</button>
+    </div>
+    <script>
+        function checkRoom(roomId) {
+            fetch(`/room/${roomId}`, {
+                method: "GET"
+            }).then(response => {
+                console.log(response.status)
+                if (response.status != 200) {
+                    console.log("Can't join the room.")
+                    alert("Can't join the room.")
+                    window.location.href = "/"
+                    window.location.replace("/")
+                }
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        function joinRoom(roomId, roomInfo) {
+            console.log(roomInfo)
+            console.log("Join room");
+            username = document.getElementById("username").value;
+            fetch(`/room/${roomId}/join?username=${username}`, {
+                method: "POST"
+            }).then(function (response) {
+                console.log(roomInfo)
+                response.json().then(data => {
+                    roomInfo["player"] = data
+                    localStorage.setItem('roomInfo', JSON.stringify(roomInfo))
+                    window.location.href = "/play";
+                    window.location.replace("/play");
+                });
+            }).catch(error => {
+                console.log(error);
+            });
+        }
+
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const params = Object.fromEntries(urlSearchParams.entries());
+        const roomInfo = { "roomId": params.roomId }
+        console.log(roomInfo);
+        checkRoom(roomInfo.roomId, roomInfo);
+        console.log(localStorage.getItem("roomInfo").roomId)
+        if (roomInfo.roomId === JSON.parse(localStorage.getItem("roomInfo")).roomId) {
+            window.location.href = "/play";
+            window.location.replace("/play");
+        };
+    </script>
+</body>
+
+</html>
