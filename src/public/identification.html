@@ -4,66 +4,174 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ITIBET</title>
+    <link href="/styles/style.css" rel="stylesheet" />
+    <title>ITI BET</title>
   </head>
 
   <body>
-    <div>
-      <input id="username" type="text" />
-      <button onclick="joinRoom(roomInfo.roomId, roomInfo)">Join room</button>
+    <div class="h-screen w-screen bg-gray-700">
+      <div
+        class="
+          min-h-full
+          flex
+          items-center
+          justify-center
+          py-12
+          px-4
+          sm:px-6
+          lg:px-8
+        "
+      >
+        <div class="max-w-md w-full space-y-8">
+          <div>
+            <img
+              class="mx-auto h-24 w-auto"
+              src="pictures/logo.png"
+              alt="Workflow"
+            />
+            <h2 class="mt-6 text-center text-8xl font-downcome text-white">
+              ITI BET
+            </h2>
+          </div>
+          <form
+            class="mt-8 space-y-6"
+            onsubmit="joinRoom(roomInfo.roomId, roomInfo)"
+          >
+            <div class="rounded-md shadow-sm -space-y-px">
+              <div>
+                <label for="username" class="sr-only">Username</label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  autocomplete="off"
+                  class="
+                    appearance-none
+                    rounded
+                    relative
+                    block
+                    w-full
+                    px-3
+                    py-2
+                    border border-gray-300
+                    placeholder-gray-500
+                    text-gray-900
+                    focus:outline-none
+                    focus:ring-primary-500
+                    focus:border-primary-500
+                    focus:z-10
+                    sm:text-sm
+                  "
+                  placeholder="Username"
+                />
+              </div>
+            </div>
+
+            <div
+              class="
+                mt-5
+                sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense
+              "
+            >
+              <button
+                type="submit"
+                class="
+                  w-full
+                  inline-flex
+                  justify-center
+                  rounded-md
+                  border border-transparent
+                  shadow-sm
+                  px-4
+                  py-2
+                  bg-primary-400
+                  text-base
+                  font-medium
+                  text-white
+                  hover:bg-primary-500
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-offset-2
+                  focus:ring-primary-300
+                  sm:col-start-2 sm:text-sm
+                "
+              >
+                Join Room
+              </button>
+              <button
+                type="button"
+                class="
+                  mt-3
+                  w-full
+                  inline-flex
+                  justify-center
+                  rounded-md
+                  border border-gray-300
+                  shadow-sm
+                  px-4
+                  py-2
+                  bg-white
+                  text-base
+                  font-medium
+                  text-gray-700
+                  hover:bg-gray-50
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-offset-2
+                  focus:ring-primary-300
+                  sm:mt-0 sm:col-start-1 sm:text-sm
+                "
+                onclick="copyToClipboard()"
+              >
+                Copy Link
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <script>
-      function checkRoom(roomId) {
-        fetch(`/room/${roomId}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            console.log(response.status);
-            if (response.status != 200) {
-              console.log("Can't join the room.");
-              alert("Can't join the room.");
-              window.location.href = "/";
-              window.location.replace("/");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-
-      function joinRoom(roomId, roomInfo) {
-        console.log(roomInfo);
-        console.log("Join room");
-        username = document.getElementById("username").value;
-        fetch(`/room/${roomId}/join?username=${username}`, {
-          method: "POST",
-        })
-          .then(function (response) {
-            console.log(roomInfo);
-            response.json().then((data) => {
-              roomInfo["player"] = data;
-              localStorage.setItem("roomInfo", JSON.stringify(roomInfo));
-              window.location.href = "/play";
-              window.location.replace("/play");
-            });
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-
-      const urlSearchParams = new URLSearchParams(window.location.search);
-      const params = Object.fromEntries(urlSearchParams.entries());
-      const roomInfo = { roomId: params.roomId };
-      console.log(roomInfo);
-      checkRoom(roomInfo.roomId, roomInfo);
-      console.log(localStorage.getItem("roomInfo").roomId);
-      if (
-        roomInfo.roomId === JSON.parse(localStorage.getItem("roomInfo")).roomId
-      ) {
-        window.location.href = "/play";
-        window.location.replace("/play");
-      }
-    </script>
   </body>
+  <script>
+    async function copyToClipboard() {
+      await navigator.clipboard.writeText(window.location.href);
+    }
+
+    function checkRoom(roomId) {
+      fetch(`/room/${roomId}`, {
+        method: 'GET',
+      }).then((response) => {
+        if (response.status != 200) {
+          alert("Can't join the room.");
+          window.location.href = '/';
+          window.location.replace('/');
+        }
+      });
+    }
+
+    function joinRoom(roomId, roomInfo) {
+      username = document.getElementById('username').value;
+      fetch(`/room/${roomId}/join?username=${username}`, {
+        method: 'POST',
+      }).then(function (response) {
+        response.json().then((data) => {
+          roomInfo['player'] = data;
+          localStorage.setItem('roomInfo', JSON.stringify(roomInfo));
+          window.location.href = '/play';
+          window.location.replace('/play');
+        });
+      });
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(searchParams.entries());
+    const roomInfo = { roomId: params.roomId };
+    checkRoom(roomInfo.roomId, roomInfo);
+    if (
+      roomInfo.roomId === JSON.parse(localStorage.getItem('roomInfo'))?.roomId
+    ) {
+      window.location.href = '/play';
+      window.location.replace('/play');
+    }
+  </script>
 </html>

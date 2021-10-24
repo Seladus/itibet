@@ -4,27 +4,80 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ITIBET</title>
+    <link href="/styles/style.css" rel="stylesheet" />
+    <title>ITI BET</title>
   </head>
 
   <body>
-    <button onclick="createRoom()">Create room</button>
-    <script>
-      function createRoom() {
-        fetch("/room/create", {
-          method: "POST",
-        })
-          .then((response) => {
-            console.log(response);
-            response.json().then((data) => {
-              window.location.href = `/identification?roomId=${data.roomId}`;
-              window.location.replace(`/identification?roomId=${data.roomId}`);
-            });
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-    </script>
+    <div class="h-screen w-screen bg-gray-700">
+      <div
+        class="
+          min-h-full
+          flex
+          items-center
+          justify-center
+          py-12
+          px-4
+          sm:px-6
+          lg:px-8
+        "
+      >
+        <div class="max-w-md w-full space-y-8">
+          <div>
+            <img
+              class="mx-auto h-24 w-auto"
+              src="pictures/logo.png"
+              alt="Workflow"
+            />
+            <h2 class="mt-6 text-center text-8xl font-downcome text-white">
+              ITI BET
+            </h2>
+          </div>
+          <form class="mt-8 space-y-6" onsubmit="createRoom()">
+            <div>
+              <input type="hidden" name="roomcode" id="roomcode" />
+              <button
+                type="submit"
+                class="
+                  group
+                  relative
+                  w-full
+                  flex
+                  justify-center
+                  py-2
+                  px-4
+                  border border-transparent
+                  text-sm
+                  font-medium
+                  rounded-md
+                  text-white
+                  bg-primary-400
+                  hover:bg-primary-500
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-offset-2
+                  focus:ring-primary-300
+                "
+              >
+                Create Room
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </body>
+  <script>
+    function createRoom() {
+      fetch('/room/create', {
+        method: 'POST',
+      }).then((response) => {
+        response.json().then((data) => {
+          const goto = `/identification?roomId=${data.roomId}`;
+          window.location.href = goto;
+          window.location.replace(goto);
+        });
+      });
+    }
+  </script>
 </html>
