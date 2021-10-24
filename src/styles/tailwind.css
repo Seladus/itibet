@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Downcome";
+  src: url("https://fonts.cdnfonts.com/s/3040/DOWNCOME.woff");
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ITIBET</title>
+  </head>
+
+  <body>
+    <button onclick="createRoom()">Create room</button>
+    <script>
+      function createRoom() {
+        fetch("/room/create", {
+          method: "POST",
+        })
+          .then((response) => {
+            console.log(response);
+            response.json().then((data) => {
+              window.location.href = `/identification?roomId=${data.roomId}`;
+              window.location.replace(`/identification?roomId=${data.roomId}`);
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    </script>
+  </body>
+</html>

@@ -1,23 +1,36 @@
 {
   "name": "itibet",
   "version": "1.0.0",
-  "main": "server/src/app.js",
+  "main": "src/app.js",
   "author": "Clément Blanco-Volle",
   "license": "MIT",
   "scripts": {
-    "start": "tsc -p server && tsc -p client && node server/out/app.js",
-    "compile": "tsc -p server && tsc -p client",
-    "compile-client": "tsc -p client"
+    "dev": "ts-node src/app.ts",
+    "server:build": "tsc",
+    "client:build": "postcss src/styles/tailwind.css -o src/public/styles/style.css",
+    "build": "yarn server:build && yarn client:build && ncp src/public out/public",
+    "start": "node out/app.js",
+    "pretty": "prettier -w ."
   },
   "dependencies": {
+    "@tailwindcss/aspect-ratio": "^0.3.0",
+    "@tailwindcss/forms": "^0.3.4",
+    "@tailwindcss/typography": "^0.4.1",
     "@types/express": "^4.17.13",
     "@types/socket.io": "^3.0.2",
+    "autoprefixer": "^10.3.7",
     "express": "^4.17.1",
+    "ncp": "^2.0.0",
+    "postcss": "^8.3.11",
+    "postcss-cli": "^9.0.1",
     "socket.io": "^4.3.1",
+    "tailwindcss": "^2.2.17",
     "yarn": "^1.22.11"
   },
   "devDependencies": {
     "@types/node": "^16.9.1",
+    "prettier": "^2.4.1",
+    "ts-node": "^10.4.0",
     "typescript": "^4.4.3"
   }
 }
