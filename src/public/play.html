@@ -70,18 +70,20 @@
             <p class="text-sm font-medium text-white">
               Name: <span id="name"></span>
             </p>
-            <p
+            <!-- <p
               class="text-base text-gray-300 hover:text-gray-400"
               onclick="copyRoomLinkToClipboard()"
             >
-              Copy Room link
-            </p>
+              Copy Room Link
+            </p> -->
           </div>
         </div>
       </div>
       <div class="p-4">
         <ul role="list">
+          <p id="room-link" class="text-gray-300 text-xs"></p>
           <h2 class="block text-sm font-medium text-white">Leaderboard</h2>
+
           <li class="py-1 flex">
             <svg
               class="h-10 w-10 text-gold"
@@ -384,58 +386,6 @@
     </div>
   </body>
 
-  <!-- <body>
-    <div id="ownerpanel" style="visibility: hidden">
-      <button
-        onclick="startBettingPhase(roomInfos.roomId, roomInfos.player.playerId)"
-      >
-        Start betting phase
-      </button>
-      <button
-        onclick="endBettingPhase(roomInfos.roomId, roomInfos.player.playerId)"
-      >
-        End betting phase
-      </button>
-      <button
-        onclick="closeBet(roomInfos.roomId, roomInfos.player.playerId, 'neutral')"
-      >
-        Close bet
-      </button>
-      <button
-        onclick="closeBet(roomInfos.roomId, roomInfos.player.playerId, 'red')"
-      >
-        Cashout Red Team
-      </button>
-      <button
-        onclick="closeBet(roomInfos.roomId, roomInfos.player.playerId, 'blue')"
-      >
-        Cashout Blue Team
-      </button>
-    </div>
-    <div id="playerpanel">
-      <input id="bet" type="number" />
-      <button
-        onclick="placeBet(roomInfos.roomId, roomInfos.player.playerId, document.getElementById('bet').value, team)"
-      >
-        Place Bet
-      </button>
-      <button onclick="changeTeam('red', roomInfos.internalState.state)">
-        Red
-      </button>
-      <button onclick="changeTeam('blue', roomInfos.internalState.state)">
-        Blue
-      </button>
-      <div><span id="coins"></span> coins</div>
-      <div><span id="name"></span></div>
-      <div><span id="state-description">...</span></div>
-      <div>
-        <h2>LeaderBoard</h2>
-        <p>1. <span id="num1"></span></p>
-        <p>2. <span id="num2"></span></p>
-        <p>3. <span id="num3"></span></p>
-      </div>
-    </div>
-  </body> -->
   <script src="/socket.io/socket.io.js"></script>
   <script>
     async function copyRoomLinkToClipboard() {
@@ -647,6 +597,10 @@
     }
 
     roomInfos = JSON.parse(localStorage.getItem('roomInfo'));
+
+    document.getElementById(
+      'room-link'
+    ).textContent = `${window.location.origin}/identification?roomId=${roomInfos.roomId}`;
 
     if (roomInfos.player.isOwner) {
       ownerpanel = document.getElementById('admin');
