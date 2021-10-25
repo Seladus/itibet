@@ -394,7 +394,7 @@
     }
 
     var room = {};
-    var team = 'neutral';
+    var team = "neutral";
 
     function changeTeam(newTeam, state) {
       if (state === 0) {
@@ -405,13 +405,13 @@
 
     function checkRoom(roomId) {
       fetch(`/room/${roomId}`, {
-        method: 'GET',
+        method: "GET",
       })
         .then((response) => {
           if (response.status != 200) {
             console.log("Can't join the room.");
-            window.location.href = '/';
-            window.location.replace('/');
+            window.location.href = "/";
+            window.location.replace("/");
           }
 
           response.json().then((data) => {
@@ -425,13 +425,13 @@
 
     function startBettingPhase(roomId, userId) {
       fetch(`/room/${roomId}/bet/betting/start?userid=${userId}`, {
-        method: 'POST',
+        method: "POST",
       })
         .then((response) => {
           if (response.status != 200) {
             console.log("Can't start betting phase");
           }
-          console.log('Betting phase started.');
+          console.log("Betting phase started.");
         })
         .catch((error) => {
           console.log(error);
@@ -440,13 +440,13 @@
 
     function endBettingPhase(roomId, userId) {
       fetch(`/room/${roomId}/bet/betting/end?userid=${userId}`, {
-        method: 'POST',
+        method: "POST",
       })
         .then((response) => {
           if (response.status != 200) {
             console.log("Can't start betting phase");
           }
-          console.log('Betting phase ended.');
+          console.log("Betting phase ended.");
         })
         .catch((error) => {
           console.log(error);
@@ -455,13 +455,13 @@
 
     function closeBet(roomId, userId, team) {
       fetch(`/room/${roomId}/bet/close?userid=${userId}&team=${team}`, {
-        method: 'POST',
+        method: "POST",
       })
         .then((response) => {
           if (response.status != 200) {
             console.log("Can't close bet");
           } else {
-            console.log('Bet successfully closed.');
+            console.log("Bet successfully closed.");
           }
         })
         .catch((error) => {
@@ -470,18 +470,18 @@
     }
 
     function placeBet(roomId, userId, value, team) {
-      if (team != 'neutral') {
+      if (team != "neutral") {
         fetch(
           `/room/${roomId}/bet/place?userid=${userId}&bet=${value}&team=${team}`,
           {
-            method: 'PUT',
+            method: "PUT",
           }
         )
           .then((response) => {
             if (response.status != 200) {
-              console.log('Could not place the bet.');
+              console.log("Could not place the bet.");
             } else {
-              console.log('Bet placed.');
+              console.log("Bet placed.");
             }
           })
           .catch((error) => {
@@ -491,7 +491,7 @@
     }
 
     function updateCoinsAmount(value) {
-      let element = document.getElementById('coins');
+      let element = document.getElementById("coins");
       element.textContent = value;
     }
 
@@ -510,34 +510,34 @@
     }
 
     function handleCloseBetsButton(team) {
-      const nextPhaseButton = document.getElementById('next-phase');
-      const cashoutButtons = document.getElementById('cashout');
-      nextPhaseButton.style.display = 'flex';
-      nextPhaseButton.textContent = 'Open Bets';
-      cashoutButtons.style.display = 'none';
+      const nextPhaseButton = document.getElementById("next-phase");
+      const cashoutButtons = document.getElementById("cashout");
+      nextPhaseButton.style.display = "flex";
+      nextPhaseButton.textContent = "Open Bets";
+      cashoutButtons.style.display = "none";
       closeBet(roomInfos.roomId, roomInfos.player.playerId, team);
     }
 
     function updateStateDescription(state) {
-      let element = document.getElementById('state-description');
-      let text = '';
+      let element = document.getElementById("state-description");
+      let text = "";
       if (state === 0) {
-        text = 'Place your bets';
+        text = "Place your bets";
       } else if (state === 1) {
-        text = 'Bets are closed';
+        text = "Bets are closed";
       } else if (state === 2) {
-        text = 'Waiting for the admin to start the game...';
+        text = "Waiting for the admin to start the game...";
       }
       element.textContent = text;
     }
 
     function updateName(name) {
-      let element = document.getElementById('name');
+      let element = document.getElementById("name");
       element.textContent = name;
     }
 
     function updateButtonState(state) {
-      const betButton = document.getElementById('bet');
+      const betButton = document.getElementById("bet");
       switch (state) {
         case 0: {
           betButton.disabled = false;
@@ -551,7 +551,7 @@
 
     function getUpdatedRoomState(roomId) {
       fetch(`/room/${roomId}`, {
-        method: 'GET',
+        method: "GET",
       })
         .then((response) => {
           if (response.status != 200) {
@@ -570,7 +570,7 @@
             updateName(
               roomInfos.internalState.players[roomInfos.player.id].name
             );
-            console.log('Room state updated.');
+            console.log("Room state updated.");
           });
         })
         .catch((error) => {
@@ -579,42 +579,52 @@
     }
 
     function toggleNextPhase() {
-      const nextPhaseButton = document.getElementById('next-phase');
-      const cashoutButtons = document.getElementById('cashout');
+      const nextPhaseButton = document.getElementById("next-phase");
+      const cashoutButtons = document.getElementById("cashout");
       switch (roomInfos.internalState.state) {
         case 2: {
           startBettingPhase(roomInfos.roomId, roomInfos.player.playerId);
-          nextPhaseButton.textContent = 'Close Bets';
+          nextPhaseButton.textContent = "Close Bets";
           break;
         }
         case 0: {
           endBettingPhase(roomInfos.roomId, roomInfos.player.playerId);
-          nextPhaseButton.style.display = 'none';
-          cashoutButtons.style.display = 'grid';
+          nextPhaseButton.style.display = "none";
+          cashoutButtons.style.display = "grid";
           break;
         }
       }
     }
 
-    roomInfos = JSON.parse(localStorage.getItem('roomInfo'));
+    roomInfos = JSON.parse(localStorage.getItem("roomInfo"));
+    roomInfos = roomInfos == null ? {} : roomInfos;
 
-    document.getElementById(
-      'room-link'
-    ).textContent = `${window.location.origin}/identification?roomId=${roomInfos.roomId}`;
+    if (
+      roomInfos != null &&
+      !("roomId" in roomInfos && "player" in roomInfos)
+    ) {
+      console.log("OUIOUI");
+      window.location.href = "/";
+      window.location.replace("/");
+    } else {
+      document.getElementById(
+        "room-link"
+      ).textContent = `${window.location.origin}/identification?roomId=${roomInfos.roomId}`;
 
-    if (roomInfos.player.isOwner) {
-      ownerpanel = document.getElementById('admin');
-      ownerpanel.style.display = 'block';
-    }
+      if (roomInfos.player.isOwner) {
+        ownerpanel = document.getElementById("admin");
+        ownerpanel.style.display = "block";
+      }
 
-    checkRoom(roomInfos.roomId);
-    getUpdatedRoomState(roomInfos.roomId);
-
-    var socket = io();
-    socket.on('update', (_) => {
-      console.log('UPDATE REQUIRED');
+      checkRoom(roomInfos.roomId);
       getUpdatedRoomState(roomInfos.roomId);
-    });
-    socket.emit('join', { roomId: roomInfos.roomId });
+
+      var socket = io();
+      socket.on("update", (_) => {
+        console.log("UPDATE REQUIRED");
+        getUpdatedRoomState(roomInfos.roomId);
+      });
+      socket.emit("join", { roomId: roomInfos.roomId });
+    }
   </script>
 </html>

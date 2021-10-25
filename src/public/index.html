@@ -33,7 +33,7 @@
               ITI BET
             </h2>
           </div>
-          <form class="mt-8 space-y-6" onsubmit="createRoom()">
+          <form class="mt-8 space-y-6" onsubmit="createRoom(); return false">
             <div>
               <input type="hidden" name="roomcode" id="roomcode" />
               <button
@@ -69,8 +69,8 @@
   </body>
   <script>
     function createRoom() {
-      fetch('/room/create', {
-        method: 'POST',
+      fetch("/room/create", {
+        method: "POST",
       }).then((response) => {
         response.json().then((data) => {
           const goto = `/identification?roomId=${data.roomId}`;
