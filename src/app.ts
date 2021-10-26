@@ -46,14 +46,14 @@ class Player {
 }
 
 class Team {
-  public players: { [playerId: string]: number } = {};
+  public players: { [playerId: number]: number } = {};
   public name: string;
   constructor(name: string) {
     this.name = name;
   }
 
-  public isPlayerInTeam(playerId): boolean {
-    return playerId in this.players;
+  public isPlayerInTeam(id): boolean {
+    return id in this.players;
   }
 
   public clear() {
@@ -61,11 +61,11 @@ class Team {
   }
 
   public addPlayerBet(player: Player, bet: number) {
-    this.players[player.playerId] = bet;
+    this.players[player.id] = bet;
   }
 
-  public removePlayerBet(playerId: string) {
-    delete this.players[playerId];
+  public removePlayerBet(id: number) {
+    delete this.players[id];
   }
 
   public computeSum() {
@@ -86,6 +86,8 @@ class BetManager {
   public players: { [playerId: string]: Player } = {};
   private socket: any;
   public rating = 1;
+  private rr = 0;
+  private rb = 0;
 
   constructor(managers: { [managerId: string]: BetManager }, io: any) {
     this.state = State.CLOSED;
@@ -96,13 +98,30 @@ class BetManager {
     this.socket = io;
   }
 
+  private getIdByPlayerId(playerId: string) {
+    for (const player in this.players) {
+      if (player === playerId) {
+        return this.players[player].id;
+      }
+    }
+  }
+
+  private getPlayerIdById(id: number) {
+    for (const player in this.players) {
+      if (this.players[player].id === id) {
+        return this.players[player].playerId;
+      }
+    }
+  }
+
   public cashout(winners: Team, losers: Team) {
     const winnersSum = winners.computeSum();
     const losersSum = losers.computeSum();
 
     if (this.rating !== 0) {
       for (let player in winners.players) {
-        this.players[player].coins +=
+        const pId = this.getPlayerIdById(parseInt(player));
+        this.players[pId].coins +=
           winnersSum < losersSum
             ? Math.round(winners.players[player] * this.rating)
             : Math.round(winners.players[player] / this.rating);
@@ -110,9 +129,10 @@ class BetManager {
     }
 
     for (let player in losers.players) {
-      this.players[player].coins -= losers.players[player];
-      if (this.players[player].coins === 0) {
-        this.players[player].coins = this.baseCoins;
+      const pId = this.getPlayerIdById(parseInt(player));
+      this.players[pId].coins -= losers.players[player];
+      if (this.players[pId].coins === 0) {
+        this.players[pId].coins = this.baseCoins;
       }
     }
   }
@@ -134,14 +154,16 @@ class BetManager {
   }
 
   public placeBet(userId: string, value: number, team: string): boolean {
+    const id = this.getIdByPlayerId(userId);
     if (value <= this.players[userId].coins && value > 0) {
-      this.red.removePlayerBet(userId);
-      this.blue.removePlayerBet(userId);
+      this.red.removePlayerBet(id);
+      this.blue.removePlayerBet(id);
       if (team === "red") {
         this.red.addPlayerBet(this.players[userId], value);
         console.log(
           `Player ${this.players[userId].name}#${userId} placed a ${value} coins bet for team ${team} in room ${this.managerId} `
         );
+        this.askForUpdate();
         return true;
       } else if (team === "blue") {
         console.log(
@@ -215,6 +237,8 @@ class BetManager {
       rc = this.rating !== 0 ? 1 : this.rating;
       rb = this.rating !== 0 ? this.rating : 1;
     }
+    this.rr = rc;
+    this.rb = rb;
     console.log(
       `[${this.managerId}] Ending betting phase with rating of (Red)${rc}:${rb}(Blue).`
     );
@@ -261,6 +285,8 @@ class BetManager {
         state: this.state,
         players: players,
         leaderBoard: leaderBoard,
+        red: this.red,
+        blue: this.blue,
       };
     } else if (this.state == State.IN_PROGRESS) {
       return {
@@ -269,7 +295,8 @@ class BetManager {
         players: players,
         red: this.red,
         blue: this.blue,
-        rating: this.rating,
+        ratingBlue: this.rb,
+        ratingRed: this.rr,
         leaderBoard: leaderBoard,
       };
     } else if (this.state == State.CLOSED) {

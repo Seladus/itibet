@@ -193,7 +193,7 @@
               "
               onclick="toggleNextPhase()"
             >
-              Open bets
+              Open Bets
             </button>
             <div id="cashout" class="hidden grid-cols-3 gap-3 mt-5">
               <button
@@ -444,7 +444,7 @@
       })
         .then((response) => {
           if (response.status != 200) {
-            console.log("Can't start betting phase");
+            console.log("Can't end betting phase");
           }
           console.log("Betting phase ended.");
         })
@@ -482,6 +482,14 @@
               console.log("Could not place the bet.");
             } else {
               console.log("Bet placed.");
+              localStorage.setItem(
+                "lastBet",
+                JSON.stringify({
+                  roomId: roomId,
+                  value: value,
+                  team: team,
+                })
+              );
             }
           })
           .catch((error) => {
@@ -522,13 +530,30 @@
       let element = document.getElementById("state-description");
       let text = "";
       if (state === 0) {
-        text = "Place your bets";
+        const lastBet = JSON.parse(localStorage.getItem("lastBet"));
+        if (lastBet !== null) {
+          text = `Bet placed !\n
+          <div><span class="${
+            lastBet.team === "red" ? "text-red-400" : "text-blue-400"
+          }">${lastBet.value}</span></div>`;
+        } else {
+          text = "Place your bets";
+        }
       } else if (state === 1) {
-        text = "Bets are closed";
+        if (localStorage.getItem("lastBet") !== null) {
+          text = `Bets are closed\n<div class="">
+            <span class="text-red-400">${roomInfos.internalState.ratingRed}</span> : 
+            <span class="text-blue-400">${roomInfos.internalState.ratingBlue}</span></div>`;
+        } else {
+          text = `Bets are closed\n<div class="">
+            <span class="text-red-400">${roomInfos.internalState.ratingRed}</span> : 
+            <span class="text-blue-400">${roomInfos.internalState.ratingBlue}</span></div>`;
+        }
       } else if (state === 2) {
+        localStorage.removeItem("lastBet");
         text = "Waiting for the admin to start the game...";
       }
-      element.textContent = text;
+      element.innerHTML = text;
     }
 
     function updateName(name) {
@@ -537,6 +562,24 @@
     }
 
     function updateButtonState(state) {
+      const nextPhaseButton = document.getElementById("next-phase");
+      const cashoutButtons = document.getElementById("cashout");
+
+      switch (state) {
+        case 0: {
+          nextPhaseButton.textContent = "Close Bets";
+          break;
+        }
+        case 1: {
+          nextPhaseButton.style.display = "none";
+          cashoutButtons.style.display = "grid";
+          break;
+        }
+        case 2: {
+          break;
+        }
+      }
+
       const betButton = document.getElementById("bet");
       switch (state) {
         case 0: {
