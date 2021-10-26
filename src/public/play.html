@@ -6,9 +6,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/styles/style.css" rel="stylesheet" />
     <title>ITI BET</title>
+    <style type="text/css">
+      #loader {
+        display: none;
+      }
+      .lds-container {
+        background-color: grey;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        opacity: 0.7;
+        z-index: 998;
+      }
+      .lds-ring {
+        opacity: 1;
+        display: inline-block;
+        position: fixed;
+        width: 80px;
+        height: 80px;
+        z-index: 999;
+        margin: auto;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        overflow: show;
+      }
+      .lds-ring div {
+        box-sizing: border-box;
+        display: block;
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        margin: 8px;
+        border: 8px solid #fff;
+        border-radius: 50%;
+        animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        border-color: #fff transparent transparent transparent;
+      }
+      .lds-ring div:nth-child(1) {
+        animation-delay: -0.45s;
+      }
+      .lds-ring div:nth-child(2) {
+        animation-delay: -0.3s;
+      }
+      .lds-ring div:nth-child(3) {
+        animation-delay: -0.15s;
+      }
+      @keyframes lds-ring {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
 
   <body class="bg-gray-700">
+    <div id="loader">
+      <div class="lds-container"></div>
+      <div class="lds-ring">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
     <div class="h-screen w-screen">
       <div class="bg-gray-600 pt-5 px-4 sm:pt-6 sm:px-6 shadow">
         <div class="flex justify-between">
@@ -67,8 +132,8 @@
           </p> -->
           </div>
           <div class="grid justify-items-end">
-            <p class="text-sm font-medium text-white">
-              Name: <span id="name"></span>
+            <p class="text-3xl font-medium text-white">
+              <span id="name"></span>
             </p>
             <!-- <p
               class="text-base text-gray-300 hover:text-gray-400"
@@ -330,6 +395,7 @@
         </div>
         <div class="grid grid-cols-2 gap-3 mt-5">
           <button
+            id="redTeam"
             class="
               mt-3
               w-full
@@ -356,6 +422,7 @@
             Red Team
           </button>
           <button
+            id="blueTeam"
             class="
               mt-3
               w-full
@@ -396,6 +463,14 @@
     var room = {};
     var team = "neutral";
 
+    function enableLoader() {
+      document.getElementById("loader").style.display = "block";
+    }
+
+    function disableLoader() {
+      document.getElementById("loader").style.display = "none";
+    }
+
     function changeTeam(newTeam, state) {
       if (state === 0) {
         console.log(`Changing team... New team is ${newTeam}.`);
@@ -424,40 +499,48 @@
     }
 
     function startBettingPhase(roomId, userId) {
+      enableLoader();
       fetch(`/room/${roomId}/bet/betting/start?userid=${userId}`, {
         method: "POST",
       })
         .then((response) => {
+          disableLoader();
           if (response.status != 200) {
             console.log("Can't start betting phase");
           }
           console.log("Betting phase started.");
         })
         .catch((error) => {
+          disableLoader();
           console.log(error);
         });
     }
 
     function endBettingPhase(roomId, userId) {
+      enableLoader();
       fetch(`/room/${roomId}/bet/betting/end?userid=${userId}`, {
         method: "POST",
       })
         .then((response) => {
+          disableLoader();
           if (response.status != 200) {
             console.log("Can't end betting phase");
           }
           console.log("Betting phase ended.");
         })
         .catch((error) => {
+          disableLoader();
           console.log(error);
         });
     }
 
     function closeBet(roomId, userId, team) {
+      enableLoader();
       fetch(`/room/${roomId}/bet/close?userid=${userId}&team=${team}`, {
         method: "POST",
       })
         .then((response) => {
+          disableLoader();
           if (response.status != 200) {
             console.log("Can't close bet");
           } else {
@@ -466,11 +549,13 @@
         })
         .catch((error) => {
           console.log(error);
+          disableLoader();
         });
     }
 
     function placeBet(roomId, userId, value, team) {
-      if (team != "neutral") {
+      if (team != "neutral" && value > 0) {
+        enableLoader();
         fetch(
           `/room/${roomId}/bet/place?userid=${userId}&bet=${value}&team=${team}`,
           {
@@ -478,8 +563,11 @@
           }
         )
           .then((response) => {
+            disableLoader();
             if (response.status != 200) {
               console.log("Could not place the bet.");
+              text = `Bet placed !\n
+                <div><span class="text-red-400">Failed to place bet. Please try again.</span></div>`;
             } else {
               console.log("Bet placed.");
               localStorage.setItem(
@@ -494,6 +582,7 @@
           })
           .catch((error) => {
             console.log(error);
+            disableLoader();
           });
       }
     }
