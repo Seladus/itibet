@@ -554,7 +554,11 @@
     }
 
     function placeBet(roomId, userId, value, team) {
-      if (team != "neutral" && value > 0) {
+      if (
+        roomInfos.internalState.state === 0 &&
+        team != "neutral" &&
+        value > 0
+      ) {
         enableLoader();
         fetch(
           `/room/${roomId}/bet/place?userid=${userId}&bet=${value}&team=${team}`,
