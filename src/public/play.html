@@ -135,18 +135,17 @@
             <p class="text-3xl font-medium text-white">
               <span id="name"></span>
             </p>
-            <!-- <p
+            <p
               class="text-base text-gray-300 hover:text-gray-400"
               onclick="copyRoomLinkToClipboard()"
             >
               Copy Room Link
-            </p> -->
+            </p>
           </div>
         </div>
       </div>
       <div class="p-4">
         <ul role="list">
-          <p id="room-link" class="text-gray-300 text-xs"></p>
           <h2 class="block text-sm font-medium text-white">Leaderboard</h2>
 
           <li class="py-1 flex">
@@ -461,94 +460,68 @@
     }
 
     var room = {};
-    var team = "neutral";
+    var team = 'neutral';
 
     function enableLoader() {
-      document.getElementById("loader").style.display = "block";
+      document.getElementById('loader').style.display = 'block';
     }
 
     function disableLoader() {
-      document.getElementById("loader").style.display = "none";
+      document.getElementById('loader').style.display = 'none';
     }
 
     function changeTeam(newTeam, state) {
       if (state === 0) {
-        console.log(`Changing team... New team is ${newTeam}.`);
         team = newTeam;
       }
     }
 
     function checkRoom(roomId) {
       fetch(`/room/${roomId}`, {
-        method: "GET",
-      })
-        .then((response) => {
-          if (response.status != 200) {
-            console.log("Can't join the room.");
-            window.location.href = "/";
-            window.location.replace("/");
-          }
-
-          response.json().then((data) => {
-            console.log(data);
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        method: 'GET',
+      }).then((response) => {
+        if (response.status != 200) {
+          window.location.href = '/';
+          window.location.replace('/');
+        }
+      });
     }
 
     function startBettingPhase(roomId, userId) {
       enableLoader();
       fetch(`/room/${roomId}/bet/betting/start?userid=${userId}`, {
-        method: "POST",
+        method: 'POST',
       })
         .then((response) => {
           disableLoader();
-          if (response.status != 200) {
-            console.log("Can't start betting phase");
-          }
-          console.log("Betting phase started.");
         })
         .catch((error) => {
           disableLoader();
-          console.log(error);
         });
     }
 
     function endBettingPhase(roomId, userId) {
       enableLoader();
       fetch(`/room/${roomId}/bet/betting/end?userid=${userId}`, {
-        method: "POST",
+        method: 'POST',
       })
         .then((response) => {
           disableLoader();
-          if (response.status != 200) {
-            console.log("Can't end betting phase");
-          }
-          console.log("Betting phase ended.");
         })
         .catch((error) => {
           disableLoader();
-          console.log(error);
         });
     }
 
     function closeBet(roomId, userId, team) {
       enableLoader();
       fetch(`/room/${roomId}/bet/close?userid=${userId}&team=${team}`, {
-        method: "POST",
+        method: 'POST',
       })
         .then((response) => {
           disableLoader();
-          if (response.status != 200) {
-            console.log("Can't close bet");
-          } else {
-            console.log("Bet successfully closed.");
-          }
         })
         .catch((error) => {
-          console.log(error);
           disableLoader();
         });
     }
@@ -556,26 +529,24 @@
     function placeBet(roomId, userId, value, team) {
       if (
         roomInfos.internalState.state === 0 &&
-        team != "neutral" &&
+        team != 'neutral' &&
         value > 0
       ) {
         enableLoader();
         fetch(
           `/room/${roomId}/bet/place?userid=${userId}&bet=${value}&team=${team}`,
           {
-            method: "PUT",
+            method: 'PUT',
           }
         )
           .then((response) => {
             disableLoader();
             if (response.status != 200) {
-              console.log("Could not place the bet.");
               text = `Bet placed !\n
                 <div><span class="text-red-400">Failed to place bet. Please try again.</span></div>`;
             } else {
-              console.log("Bet placed.");
               localStorage.setItem(
-                "lastBet",
+                'lastBet',
                 JSON.stringify({
                   roomId: roomId,
                   value: value,
@@ -585,19 +556,17 @@
             }
           })
           .catch((error) => {
-            console.log(error);
             disableLoader();
           });
       }
     }
 
     function updateCoinsAmount(value) {
-      let element = document.getElementById("coins");
+      let element = document.getElementById('coins');
       element.textContent = value;
     }
 
     function updateLeaderBoard(leaderboard) {
-      console.log(leaderboard);
       for (let i = 0; i < 3; i++) {
         const field_name = `top${i + 1}-name`;
         const field_coins = `top${i + 1}-coins`;
@@ -611,29 +580,29 @@
     }
 
     function handleCloseBetsButton(team) {
-      const nextPhaseButton = document.getElementById("next-phase");
-      const cashoutButtons = document.getElementById("cashout");
-      nextPhaseButton.style.display = "flex";
-      nextPhaseButton.textContent = "Open Bets";
-      cashoutButtons.style.display = "none";
+      const nextPhaseButton = document.getElementById('next-phase');
+      const cashoutButtons = document.getElementById('cashout');
+      nextPhaseButton.style.display = 'flex';
+      nextPhaseButton.textContent = 'Open Bets';
+      cashoutButtons.style.display = 'none';
       closeBet(roomInfos.roomId, roomInfos.player.playerId, team);
     }
 
     function updateStateDescription(state) {
-      let element = document.getElementById("state-description");
-      let text = "";
+      let element = document.getElementById('state-description');
+      let text = '';
       if (state === 0) {
-        const lastBet = JSON.parse(localStorage.getItem("lastBet"));
+        const lastBet = JSON.parse(localStorage.getItem('lastBet'));
         if (lastBet !== null) {
           text = `Bet placed !\n
           <div><span class="${
-            lastBet.team === "red" ? "text-red-400" : "text-blue-400"
+            lastBet.team === 'red' ? 'text-red-400' : 'text-blue-400'
           }">${lastBet.value}</span></div>`;
         } else {
-          text = "Place your bets";
+          text = 'Place your bets';
         }
       } else if (state === 1) {
-        if (localStorage.getItem("lastBet") !== null) {
+        if (localStorage.getItem('lastBet') !== null) {
           text = `Bets are closed\n<div class="">
             <span class="text-red-400">${roomInfos.internalState.ratingRed}</span> : 
             <span class="text-blue-400">${roomInfos.internalState.ratingBlue}</span></div>`;
@@ -643,29 +612,29 @@
             <span class="text-blue-400">${roomInfos.internalState.ratingBlue}</span></div>`;
         }
       } else if (state === 2) {
-        localStorage.removeItem("lastBet");
-        text = "Waiting for the admin to start the game...";
+        localStorage.removeItem('lastBet');
+        text = 'Waiting for the admin to start the game...';
       }
       element.innerHTML = text;
     }
 
     function updateName(name) {
-      let element = document.getElementById("name");
+      let element = document.getElementById('name');
       element.textContent = name;
     }
 
     function updateButtonState(state) {
-      const nextPhaseButton = document.getElementById("next-phase");
-      const cashoutButtons = document.getElementById("cashout");
+      const nextPhaseButton = document.getElementById('next-phase');
+      const cashoutButtons = document.getElementById('cashout');
 
       switch (state) {
         case 0: {
-          nextPhaseButton.textContent = "Close Bets";
+          nextPhaseButton.textContent = 'Close Bets';
           break;
         }
         case 1: {
-          nextPhaseButton.style.display = "none";
-          cashoutButtons.style.display = "grid";
+          nextPhaseButton.style.display = 'none';
+          cashoutButtons.style.display = 'grid';
           break;
         }
         case 2: {
@@ -673,7 +642,7 @@
         }
       }
 
-      const betButton = document.getElementById("bet");
+      const betButton = document.getElementById('bet');
       switch (state) {
         case 0: {
           betButton.disabled = false;
@@ -687,80 +656,62 @@
 
     function getUpdatedRoomState(roomId) {
       fetch(`/room/${roomId}`, {
-        method: "GET",
-      })
-        .then((response) => {
-          if (response.status != 200) {
-            console.log("Can't get room state.");
-          }
-
-          response.json().then((data) => {
-            console.log(data);
-            roomInfos.internalState = data;
-            updateButtonState(roomInfos.internalState.state);
-            updateCoinsAmount(
-              roomInfos.internalState.players[roomInfos.player.id].coins
-            );
-            updateLeaderBoard(roomInfos.internalState.leaderBoard);
-            updateStateDescription(roomInfos.internalState.state);
-            updateName(
-              roomInfos.internalState.players[roomInfos.player.id].name
-            );
-            console.log("Room state updated.");
-          });
-        })
-        .catch((error) => {
-          console.log(error);
+        method: 'GET',
+      }).then((response) => {
+        response.json().then((data) => {
+          roomInfos.internalState = data;
+          updateButtonState(roomInfos.internalState.state);
+          updateCoinsAmount(
+            roomInfos.internalState.players[roomInfos.player.id].coins
+          );
+          updateLeaderBoard(roomInfos.internalState.leaderBoard);
+          updateStateDescription(roomInfos.internalState.state);
+          updateName(roomInfos.internalState.players[roomInfos.player.id].name);
         });
+      });
     }
 
     function toggleNextPhase() {
-      const nextPhaseButton = document.getElementById("next-phase");
-      const cashoutButtons = document.getElementById("cashout");
+      const nextPhaseButton = document.getElementById('next-phase');
+      const cashoutButtons = document.getElementById('cashout');
       switch (roomInfos.internalState.state) {
         case 2: {
           startBettingPhase(roomInfos.roomId, roomInfos.player.playerId);
-          nextPhaseButton.textContent = "Close Bets";
+          nextPhaseButton.textContent = 'Close Bets';
           break;
         }
         case 0: {
           endBettingPhase(roomInfos.roomId, roomInfos.player.playerId);
-          nextPhaseButton.style.display = "none";
-          cashoutButtons.style.display = "grid";
+          nextPhaseButton.style.display = 'none';
+          cashoutButtons.style.display = 'grid';
           break;
         }
       }
     }
 
-    roomInfos = JSON.parse(localStorage.getItem("roomInfo"));
+    roomInfos = JSON.parse(localStorage.getItem('roomInfo'));
     roomInfos = roomInfos == null ? {} : roomInfos;
 
     if (
       roomInfos != null &&
-      !("roomId" in roomInfos && "player" in roomInfos)
+      !('roomId' in roomInfos && 'player' in roomInfos)
     ) {
-      console.log("OUIOUI");
-      window.location.href = "/";
-      window.location.replace("/");
+      window.location.href = '/';
+      window.location.replace('/');
     } else {
-      document.getElementById(
-        "room-link"
-      ).textContent = `${window.location.origin}/identification?roomId=${roomInfos.roomId}`;
-
       if (roomInfos.player.isOwner) {
-        ownerpanel = document.getElementById("admin");
-        ownerpanel.style.display = "block";
+        ownerpanel = document.getElementById('admin');
+        ownerpanel.style.display = 'block';
       }
 
       checkRoom(roomInfos.roomId);
       getUpdatedRoomState(roomInfos.roomId);
 
       var socket = io();
-      socket.on("update", (_) => {
-        console.log("UPDATE REQUIRED");
+      socket.on('update', (_) => {
         getUpdatedRoomState(roomInfos.roomId);
       });
-      socket.emit("join", { roomId: roomInfos.roomId });
+      socket.emit('join', { roomId: roomInfos.roomId });
     }
   </script>
 </html>
