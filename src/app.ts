@@ -5,9 +5,14 @@ const crypto = require("crypto");
 const express = require("express");
 const app = express();
 const http = require("http");
-const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server);
+const fs = require("fs");
+const https = require("https");
+var privateKey = fs.readFileSync("sslcert/server.key", "utf8");
+var certificate = fs.readFileSync("sslcert/server.crt", "utf8");
+const server = https.createServer({ key: privateKey, cert: certificate }, app);
+
+const io = new Server(server, { secure: true });
 
 enum State {
   OPEN,
@@ -453,4 +458,4 @@ io.on("connection", (socket: Socket) => {
   );
 });
 
-server.listen(8080);
+server.listen(443);
